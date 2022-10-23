@@ -100,13 +100,4 @@ class StaticSiteValetDriver extends ValetDriver
         set_include_path(get_include_path() . PATH_SEPARATOR . dirname($this->betterSitePath . $this->betterUri . $this->betterFileName));
         return $this->betterSitePath . $this->betterUri . $this->betterFileName;
     }
-
-    public function getUri() {
-        $path = $_SERVER['REQUEST_URI'] ?? '/';
-        $position = strpos($path, '?');
-        if ($position === false) {
-            return $path;
-        }
-        return substr($path, 0, $position);
-    }
 }
