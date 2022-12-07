@@ -1,5 +1,7 @@
 <?php
 
+// date_default_timezone_set('Europe/Stockholm');
+
 class StaticSiteValetDriver extends ValetDriver
 {
     public function serves($sitePath, $siteName, $uri)
@@ -40,27 +42,35 @@ class StaticSiteValetDriver extends ValetDriver
                 die();
             }
         } else {
-            // A filename is in the url, check that it exist
 
-            // Divide subfolders into array
+            // A filename is in the url, check that it exist
+            // it will always start with a slash so remove that first one and possibly the last
+            $uri = trim($uri, "/");
             $parts = [];
-            if (mb_strlen($uri) > 1 && strpos($uri,"/") !== false) {
+
+            // if it still contains slashes, split it into parts
+            if (strpos($uri,"/") !== false) {
                 $parts = explode('/',$uri);
             } else {
+                //else just add it
                 $parts[] = $uri;
             }
 
-            // Extract the filename
-            if (count($parts) > 0) {
+            // We are now sure the last parts[] is the file and if there are more they are directories
+            // Extract the filename (we already know it is not a directory here)
+            if (count($parts) > 1) {
                 $fileName = end($parts);
                 array_pop($parts);
+            } else {
+                $fileName = $parts[0]; $parts = [];
             }
 
-            // Rebuild without Filename
-            $uri = implode("/", $parts);
-
-            // Add a slash if needed
-            $uri = strlen($uri) > 0 ? $uri . "/" : $uri;
+            // if there is anything left in parts its the path so join them to a path
+            if (count($parts)) {
+                $uri = "/".implode("/", $parts)."/";
+            } else {
+                $uri = "/";
+            }
 
             // Finally check if file exist
             if ( ! file_exists($sitePath . $uri . $fileName)) {
