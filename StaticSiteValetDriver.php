@@ -8,6 +8,15 @@ class StaticSiteValetDriver extends ValetDriver
     {
         // If this is a Laravel installation then we will not serve it with this driver
         if (file_exists($sitePath.'/artisan')) return false;
+
+        // If there is a .htaccess file with ReWriteEngine On we will also handle as app with front-controller
+        if (file_exists($sitePath.'/.htaccess')) {
+            //Check that the file is using ReWriteEngine
+            $htaccessFile = file_get_contents($sitePath.'/.htaccess');
+            if (preg_match('/(?i)\b(R(?:ewriteEngine)?)(\s*)(On)/', $htaccessFile)) {
+                return false;
+            }
+        }
         // ... might need to add more exceptions for different frameworks here
 
         // Use public folder as site root if one is present
