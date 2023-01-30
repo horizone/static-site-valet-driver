@@ -17,6 +17,16 @@ class StaticSiteValetDriver extends ValetDriver
                 return false;
             }
         }
+
+        // If there is a .htaccess file with ReWriteEngine On in /public we will also handle as app with front-controller
+        if (file_exists($sitePath.'/public/.htaccess')) {
+            //Check that the file is using ReWriteEngine
+            $htaccessFile = file_get_contents($sitePath.'/public/.htaccess');
+            if (preg_match('/(?i)\b(R(?:ewriteEngine)?)(\s*)(On)/', $htaccessFile)) {
+                return false;
+            }
+        }
+
         // ... might need to add more exceptions for different frameworks here
 
         // Use public folder as site root if one is present
