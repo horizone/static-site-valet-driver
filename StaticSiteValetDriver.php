@@ -2,15 +2,24 @@
 
 // date_default_timezone_set('Europe/Stockholm');
 
+namespace Valet\Drivers\Custom;
+
+use Valet\Drivers\ValetDriver;
+
 class StaticSiteValetDriver extends ValetDriver
 {
-    public function serves($sitePath, $siteName, $uri)
+    private string $betterSitePath;
+    private string $betterUri;
+    private string $betterFileName;
+
+    public function serves(string $sitePath, string $siteName, string $uri) : bool
     {
         // If this is a Laravel installation then we will not serve it with this driver
         if (file_exists($sitePath.'/artisan')) return false;
 
         // If there is a .htaccess file with ReWriteEngine On we will also handle as app with front-controller
         if (file_exists($sitePath.'/.htaccess')) {
+
             //Check that the file is using ReWriteEngine
             $htaccessFile = file_get_contents($sitePath.'/.htaccess');
             if (preg_match('/(?i)\b(R(?:ewriteEngine)?)(\s*)(On)/', $htaccessFile)) {
@@ -20,6 +29,7 @@ class StaticSiteValetDriver extends ValetDriver
 
         // If there is a .htaccess file with ReWriteEngine On in /public we will also handle as app with front-controller
         if (file_exists($sitePath.'/public/.htaccess')) {
+
             //Check that the file is using ReWriteEngine
             $htaccessFile = file_get_contents($sitePath.'/public/.htaccess');
             if (preg_match('/(?i)\b(R(?:ewriteEngine)?)(\s*)(On)/', $htaccessFile)) {
@@ -93,6 +103,7 @@ class StaticSiteValetDriver extends ValetDriver
 
             // Finally check if file exist
             if ( ! file_exists($sitePath . $uri . $fileName)) {
+
                 // Non existing file
                 http_response_code(404);
                 echo "<h1>Not Found</h1><p>There is no ".$fileName." in ".$sitePath . $uri."</p>";
@@ -107,7 +118,7 @@ class StaticSiteValetDriver extends ValetDriver
         return true;
     }
 
-    public function isStaticFile($sitePath, $siteName, $uri)
+    public function isStaticFile(string $sitePath, string $siteName, string $uri) : bool
     {
         if (substr($this->betterFileName,-4) == ".php") return false;
         if (isset($this->betterSitePath) && isset($this->betterUri) && isset($this->betterFileName)) {
@@ -116,7 +127,7 @@ class StaticSiteValetDriver extends ValetDriver
         return false;
     }
 
-    public function frontControllerPath($sitePath, $siteName, $uri)
+    public function frontControllerPath(string $sitePath, string $siteName, string $uri) : string
     {
         // Correct globals to be more like a static site usually
         // creates them since Valet otherwise changes them
